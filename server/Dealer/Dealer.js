@@ -1,23 +1,21 @@
 const dealerConfig = require('./Dealer.config')
-const readline = require("readline");
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
 
-function Dealer() {
-    const itemsList = []
+class Dealer {
+    constructor() {
+        this.itemsList = [];
+        this.totalBudget = 0;
+    }
 
-    const checkValidity = (number) => {
+    checkValidity(number) {
         if (isNaN(number)) {
             return console.log('invalid value, must be integer');
         }
         return true;
     }
 
-    const numberOfItems = () => {
+    numberOfItems() {
         console.log(dealerConfig);
-        if (checkValidity(dealerConfig.n) && checkValidity(dealerConfig.m)) {
+        if (this.checkValidity(dealerConfig.n) && this.checkValidity(dealerConfig.m)) {
             let N = 0
             while (N < dealerConfig.n) {
                 N = Math.floor(Math.random() * dealerConfig.m) + 1;
@@ -27,40 +25,28 @@ function Dealer() {
         return console.log('Opps, somthing went wrong');
     }
 
-    const randomPrice = () => {
-        if (checkValidity(dealerConfig.x) && checkValidity(dealerConfig.y)) {
+    randomPrice() {
+        if (this.checkValidity(dealerConfig.x) && this.checkValidity(dealerConfig.y)) {
             let itemValue = 0
             while (itemValue < dealerConfig.x) {
                 itemValue = Math.floor(Math.random() * dealerConfig.y) + 1
             }
+            this.totalBudget += itemValue
             return '$ ' + itemValue
         }
         return console.log('Opps, somthing went wrong');
     }
-
-    const initItemsList = async () => {
-        let N = numberOfItems()
+    initItemsList() {
+        let N = this.numberOfItems()
         console.log(N);
         for (let i = 1; i < N + 1; i++) {
-            let itemPrice = randomPrice()
+            let itemPrice = this.randomPrice()
             console.log(`item${i} =  ${itemPrice}`);
-            itemsList.push({ id: `item${i}`, price: itemPrice })
+            this.itemsList.push({ name: `item${i}`, price: itemPrice })
         }
-    }
-
-    return {
-        initItemsList
     }
 }
 
-
 module.exports = Dealer;
-
-
-
-
-
-
-
 
 

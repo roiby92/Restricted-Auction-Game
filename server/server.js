@@ -20,6 +20,21 @@ const server = app.listen(PORT, function (req, res) {
     console.log(`running on port ${PORT}`);
 });
 
+
+
+const Game = require('./Game/Game')
+const p1 = { id: 1, name: "roi" }
+const p2 = { id: 2, name: "shir" }
+const p3 = { id: 3, name: "Messi" }
+const p4 = { id: 4, name: "ronaldo" }
+
+const game = new Game()
+game.playerEnterToQueue(p1)
+game.playerEnterToQueue(p2)
+game.playerEnterToQueue(p3)
+game.playerEnterToQueue(p4)
+game.gameStart();
+
 const io = socketIO(server);
 
 io.on('connection', (socket) => {
