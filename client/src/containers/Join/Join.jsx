@@ -6,9 +6,8 @@ const Join = () => {
     const history = useHistory();
 
     const [userDetaile, setUserDetaile] = useState({
-        userName: '',
-        room: 1,
-        budget: ''
+        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+        name: ''
     })
 
     const handleChenge = event => {
@@ -25,7 +24,7 @@ const Join = () => {
 
     const handleSubmit = () => {
         console.log(userDetaile);
-        if (userDetaile.userName && userDetaile.budget) {
+        if (userDetaile.name) {
             history.push(`/bord`)
         }
         else {
@@ -35,51 +34,33 @@ const Join = () => {
 
     const checkValidity = (key, value) => {
         let isValid = true;
-        if (key === 'userName') {
+        if (key === 'name') {
             const pattern = /^[a-zA-Z]/;
-            isValid = pattern.test(value) && isValid
-        }
-        if (key === 'budget' || key === 'room') {
-            const pattern = /^\d+$/;
             isValid = pattern.test(value) && isValid
         }
         return isValid;
     }
 
     return (
-        <div id='enter'>
-            <div id='form'>
-                <input
-                    id='name'
-                    name='userName'
-                    type='text'
-                    placeholder='enter your full name'
-                    value={userDetaile.userName}
-                    onChange={handleChenge}
-                />
-                <input
-                    id='budget'
-                    name='budget'
-                    type='number'
-                    placeholder='enter your budget'
-                    value={userDetaile.budget}
-                    onChange={handleChenge}
-                />
-                <input
-                    id='room'
-                    name='room'
-                    type='number'
-                    placeholder='enter your room'
-                    value={userDetaile.room}
-                    onChange={handleChenge}
-                />
-                <button
-                    id='submit'
-                    type='submit'
-                    onClick={handleSubmit}
-                >
-                    Get Inside TO Bet!!
+        <div>
+            <div id='enter'>
+                <div id='form'>
+                    <input
+                        id='name'
+                        name='name'
+                        type='text'
+                        placeholder='enter your full name'
+                        value={userDetaile.userName}
+                        onChange={handleChenge}
+                    />
+                    <button
+                        id='submit'
+                        type='submit'
+                        onClick={handleSubmit}
+                    >
+                        Get Inside TO Bet!!
             </button>
+                </div>
             </div>
         </div>
     )

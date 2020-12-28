@@ -1,9 +1,10 @@
+
 #enter {
     margin: auto;
-    margin-top: 15px;
+    margin-top: 200px;
     background-color: blue;
     height: 250px;
-    width: 400px;
+    width: 330px;
     border-radius: 20px;
 }
 
@@ -21,18 +22,7 @@
     margin-top: 15px;
 }
 
-#budget{
-    width: 60%;
-    height: 40px;
-    margin: auto;
-}
-
 #submit{
-    width: 60%;
-    height: 40px;
-    margin: auto;
-}
-#room{
     width: 60%;
     height: 40px;
     margin: auto;

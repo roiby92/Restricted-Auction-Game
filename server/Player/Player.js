@@ -6,12 +6,12 @@ class Player {
         this.itemsPurchased = [];
     };
 
-    playerBoughtItem(item, bet) {
+    playerBoughtItem = (item, bet) => {
         this.budget -= bet;
         this.itemsPurchased.push(item)
     };
 
-    playerDetails() {
+    playerDetails = () => {
         return console.log(this);
     };
 

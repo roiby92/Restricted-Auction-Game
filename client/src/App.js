@@ -11,7 +11,7 @@ function App() {
         exact component={Join}
       />
       <Route path='/bord'
-        exact component={GameBord}
+         component={GameBord}
       />
     </Router>
   );

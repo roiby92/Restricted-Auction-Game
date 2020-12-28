@@ -1,31 +1,31 @@
 class Queue {
     constructor() {
-        this.collection = [];
-    }
-
-    enqueue = function (element) {
-        this.collection.push(element);
+        this.queue = [];
     };
 
-    dequeue = function () {
-        return this.collection.shift();
+    enqueue = (element) => {
+        this.queue.push(element);
     };
 
-    peek = function () {
-        return this.collection[0];
+    dequeue = () => {
+        return this.queue.shift();
     };
 
-    size = function () {
-        return this.collection.length;
+    peek = () => {
+        return this.queue[0];
     };
 
-    isEmpty = function () {
-        return (this.collection.length === 0);
+    size = () => {
+        return this.queue.length;
     };
 
-    print = function () {
-        console.log(this.collection);
+    isEmpty = () => {
+        return (this.queue.length === 0);
     };
-}
+
+    print = () => {
+        console.log(this.queue);
+    };
+};
 
 module.exports = Queue;
