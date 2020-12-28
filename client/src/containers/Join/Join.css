@@ -1,0 +1,39 @@
+#enter {
+    margin: auto;
+    margin-top: 15px;
+    background-color: blue;
+    height: 250px;
+    width: 400px;
+    border-radius: 20px;
+}
+
+#form {
+    display: grid;
+    grid-template-rows: auto;
+    grid-gap: 20px;
+    margin-top: 10px;
+}
+
+#name {
+    width: 60%;
+    height: 40px;
+    margin: auto;
+    margin-top: 15px;
+}
+
+#budget{
+    width: 60%;
+    height: 40px;
+    margin: auto;
+}
+
+#submit{
+    width: 60%;
+    height: 40px;
+    margin: auto;
+}
+#room{
+    width: 60%;
+    height: 40px;
+    margin: auto;
+}
