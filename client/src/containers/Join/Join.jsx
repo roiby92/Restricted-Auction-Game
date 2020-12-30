@@ -1,36 +1,36 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom'
+import socket from '../../socket';
 import './Join.css';
 
 const Join = () => {
     const history = useHistory();
-
-    const [userDetaile, setUserDetaile] = useState({
-        id: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
-        name: ''
-    })
+    const [userName, setUserName] = useState('')
 
     const handleChenge = event => {
-        const key = event.target.name
         const value = event.target.value
-        if (checkValidity(key, value)) {
-            setUserDetaile({ ...userDetaile, [key]: value })
+        if (checkValidity(value)) {
+            setUserName(value)
         }
         else {
-            setUserDetaile({ ...userDetaile, [key]: '' })
+            setUserName('')
             alert('insert valid caracters pleas')
         }
-    }
+    };
 
     const handleSubmit = () => {
-        console.log(userDetaile);
-        if (userDetaile.name) {
+        console.log(userName);
+        if (userName) {
+            socket.emit("enter", userName);
+            socket.on("player", (player) => {
+                console.log(player);
+            });
             history.push(`/bord`)
         }
         else {
             alert('must enter your data')
         }
-    }
+    };
 
     const checkValidity = (key, value) => {
         let isValid = true;
@@ -50,7 +50,7 @@ const Join = () => {
                         name='name'
                         type='text'
                         placeholder='enter your full name'
-                        value={userDetaile.userName}
+                        value={userName}
                         onChange={handleChenge}
                     />
                     <button
