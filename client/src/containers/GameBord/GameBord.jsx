@@ -1,35 +1,44 @@
 import React, { useEffect, useState } from 'react'
-import io from "socket.io-client";
+import { useDispatch, useSelector } from 'react-redux';
 import Dealer from '../../components/Dealer/Dealer'
-const ENDPOINT = "http://localhost:3001";
-const socket = io(ENDPOINT);
+import * as actions from '../../store/actions/index'
+import socket from '../../socket'
+import Timer from '../../components/Timer/Timer'
 
 const GameBord = () => {
+    const bid = 1000
+    const player = useSelector(state => state.player)
 
-    const [game, setGame] = useState('');
-    const [dealer, setDealer] = useState();
     useEffect(() => {
-
-        socket.on('game', (game) => {
-            console.log(game);
-            setGame(game)
-            setDealer(game.dealer)
-        })
-        checkIsRun()
-
-        socket.emit('initItems')
-
-    }, [])
-    const checkIsRun = async () => {
-        if (!game.isRun) {
-            socket.emit('addQueue', 'roi')
-        }
+        socket.on("player", (player) => {
+            console.log(player);
+        });
+        socket.on("players", (players) => {
+            console.log(players);
+        });
+    })
+    const handleTime = () => {
+        socket.emit('Round');
     }
+
+    const handleOffer = () => {
+        socket.emit('offer', { price: bid, player: player });
+    }
+
     return (
         <div>
-            <Dealer dealer={dealer} />
+            <h1 onClick={handleTime}> CLICK</h1>
+            <br />
+            {/* <p>{item.name} {item.price}</p> */}
+            <br />
+            <h2 onClick={handleOffer}>offer</h2>
+            <br />
+            <br />
+            <Timer />
         </div>
     )
 }
 
 export default GameBord
+
+

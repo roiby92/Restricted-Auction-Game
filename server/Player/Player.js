@@ -1,14 +1,18 @@
 class Player {
-    constructor(player) {
-        this.id = player.id;
-        this.playerName = player.name;
-        this.budget = player.budget;
+    constructor(id, name) {
+        this.id = id;
+        this.playerName = name;
+        this.budget = 0;
         this.itemsPurchased = [];
     };
 
-    playerBoughtItem = (item, bet) => {
-        this.budget -= bet;
-        this.itemsPurchased.push(item)
+    setBudget = (budget) => {
+        this.budget = budget
+    }
+
+    playerPurchaseItem = (bid) => {
+        this.budget -= bid.price;
+        this.itemsPurchased.push(bid);
     };
 
     playerDetails = () => {
