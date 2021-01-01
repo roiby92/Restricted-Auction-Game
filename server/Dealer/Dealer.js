@@ -4,7 +4,25 @@ class Dealer {
     constructor() {
         this.N = 0
         this.itemsList = [];
-        this.totalPrice = 0; 
+        this.profit = 0
+        this.totalPrice = 0;
+    };
+
+    getTotalPrice = () => this.totalPrice;
+    getItemsList = () => this.itemsList;
+    getN = () => this.N;
+
+    resetData = () => {
+        this.N = 0
+        this.itemsList = [];
+        this.profit = 0
+        this.totalPrice = 0;
+    }
+
+    itemSold = (winningBid) => {
+        const itemIndex = this.itemsList.findIndex(item => item.name === winningBid.name);
+        this.itemsList.splice(itemIndex, 1);
+        this.profit += winningBid.bidPrice;
     };
 
     checkValidity = (number) => {
@@ -18,7 +36,7 @@ class Dealer {
         if (this.checkValidity(dealerConfig.n) && this.checkValidity(dealerConfig.m)) {
             console.log(this.N);
             while (this.N < dealerConfig.n) {
-                this.N= Math.floor(Math.random() * dealerConfig.m) + 1;
+                this.N = Math.floor(Math.random() * dealerConfig.m) + 1;
                 console.log(this.N);
             };
             return this.N;
@@ -39,23 +57,14 @@ class Dealer {
     };
 
     initItemsList = () => {
-        this.numberOfItems()
+        this.numberOfItems();
         for (let i = 1; i < this.N + 1; i++) {
-            let itemPrice = this.randomPrice()
+            let itemPrice = this.randomPrice();
             console.log(`item${i} =  $${itemPrice}`);
             this.itemsList.push({ name: `item${i}`, price: itemPrice });
         };
     };
-
-    getTotalPrice=()=>{
-        return this.totalPrice;
-    }
-
-    getN=()=>{
-        return this.N;
-    }
 };
-
 module.exports = Dealer;
 
 
