@@ -147,7 +147,5 @@ const getGameWinner = () => {
             winner = player
         };
     };
-    return console.log(winner);;
-
-    
+    return console.log(winner);;  
 };
