@@ -1,38 +1,32 @@
 import * as actionsTypes from './actionTypes'
-
-export const queueChange = queue => {
+export const gameStart = game => {
     return {
-        type: actionsTypes.PLAYER_ENTER,
-        queue: queue
-    }
+        type: actionsTypes.START_GAME,
+        game
+    };
 };
-export const setTime = (time) => {
+export const updateGame = game => {
+    return {
+        type: actionsTypes.UPDATE_GAME,
+        game
+    };
+};
+export const gameOver = () => { return { type: actionsTypes.GAME_OVER } };
+export const setCurrentItem = item => {
+    return {
+        type: actionsTypes.SET_CURRENT_ITEM,
+        item
+    };
+};
+export const setTime = time => {
     return {
         type: actionsTypes.SET_TIME,
         time
-    }
-}
-
-export const playerLeaveGame = (id) => {
-    return {
-        type: actionsTypes.PLAYER_LEAVE,
-        id,
-    }
+    };
 };
-
-export const startGame = (index) => {
+export const playerBid = bids => {
     return {
-        type: actionsTypes.START_GAME,
-        isRun: true,
-    }
+        type: actionsTypes.PLAYER_BID,
+        bids
+    };
 };
-
-export const playerBet = (id, betAmaount, item) => {
-    return {
-        type: actionsTypes.PLAYER_BET,
-        id,
-        betAmaount,
-        item
-
-    }
-}

@@ -1,46 +1,47 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom'
+import { useDispatch, useSelector} from 'react-redux';
+import * as actions from '../../store/actions/index'
 import socket from '../../socket';
 import './Join.css';
 
 const Join = () => {
     const history = useHistory();
-    const [userName, setUserName] = useState('')
-
+    const [userName, setUserName] = useState('');
+    const dispatch = useDispatch();
+    const gameIsRun = useSelector(state => state.game.isRun)
     const handleChenge = event => {
-        const value = event.target.value
+        const value = event.target.value;
         if (checkValidity(value)) {
-            setUserName(value)
+            setUserName(value);
         }
         else {
-            setUserName('')
-            alert('insert valid caracters pleas')
-        }
+            setUserName('');
+            alert('insert valid caracters pleas');
+        };
     };
 
     const handleSubmit = () => {
-        console.log(userName);
         if (userName) {
             socket.emit("enter", userName);
-            socket.on("player", (player) => {
-                console.log(player);
-            });
-            history.push(`/bord`)
+            if(!gameIsRun){
+                socket.emit('startGame')
+            }
+            history.push(`/bord`);
         }
         else {
-            alert('must enter your data')
-        }
+            alert('must enter your data');
+        };
     };
 
     const checkValidity = (key, value) => {
         let isValid = true;
         if (key === 'name') {
             const pattern = /^[a-zA-Z]/;
-            isValid = pattern.test(value) && isValid
+            isValid = pattern.test(value) && isValid;
         }
         return isValid;
-    }
-
+    };
     return (
         <div>
             <div id='enter'>
@@ -63,7 +64,6 @@ const Join = () => {
                 </div>
             </div>
         </div>
-    )
-}
-
+    );
+};
 export default Join;

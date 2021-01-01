@@ -11,11 +11,10 @@ const Timer = () => {
         socket.on('time', (time) => {
             dispatch(actions.setTime(time))
         })
-    }, [time])
-
+    }, [time]);
     return (
         <div>
-            {time && <h3>{time}</h3>}
+            {time ? <h3>{time}</h3> : <h4>loading</h4>}
         </div>
     )
 }
