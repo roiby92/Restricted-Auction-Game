@@ -1,89 +1,57 @@
 const Dealer = require('../Dealer/Dealer');
-const Player = require('../Player/Player')
+const dealerConfig = require('../Dealer/Dealer.config');
 
 class Game {
     constructor() {
         this.dealer = new Dealer()
-        this.numberOfPlayers = 0
         this.isRun = false
-        this.round = 0
+        this.currentItem = null
+        this.round = 1
         this.bids = []
-        this.interval
-        this.warFactor = 0.01
-    }
-    getGameStatus = () => {
-        return this.isRun
-    }
+        this.numberOfPlayers = 0
+    };
 
     gameStart = () => {
         this.isRun = true;
-    }
-    gameOver = () => {
-        this.isRun = false
-    }
-    getItemList = () => {
-        return this.dealer.itemsList
-    }
-    getTotalPrice = () => {
-        return this.dealer.totalPrice;
-    }
-    incRound = () => {
-        this.round += 1
-    }
-    setUpNewGame = () => {
         this.dealer.initItemsList();
-    }
-    resetBids = () => {
-        this.bids = []
-    }
+        this.setCurrentItem();
+    };
+    gameOver = () => {
+        this.dealer.resetData();
+        this.isRun = false;
+        this.currentItem = null;
+        this.round = 1;
+        this.bids = [];
+        this.numberOfPlayers = 0;
+    };
+    incRound = () => this.round += 1;
+    getGameStatus = () => this.isRun;
+    getItemList = () => this.dealer.itemsList
+    getTotalPrice = () => this.dealer.totalPrice;
+    getCurrentItem = () => this.currentItem;
+    getWinningBid = () => {
+        if (this.bids.length === 1) {
+            return this.bids[0];
+        }
+        return false;
+    };
+    setCurrentItem = () => this.currentItem = this.dealer.itemsList[this.round - 1];
+    resetBids = () => this.bids = [];
     setBestBid = (bid) => {
-        if (!this.bids[0]) {
-            this.bids.push(bid)
+        if (this.bids.length === 0) {
+            this.bids.push(bid);
         }
         else if (bid.price > this.bids[0].price) {
-            this.resetBids()
-            this.bids.push(bid)
-            return true
+            this.resetBids();
+            this.bids.push(bid);
         }
         else if (bid.price === this.bids[0].price) {
-            this.bids.push(bid)
-            return true
+            this.bids.push(bid);
         }
-        else {
+        else if (bid.price < this.bids[0].price) {
             return false
-        }
-    }
-
-    sellItem = (item, socket) => {
-        let counter = 10;
-        return setTimeout(() => {
-            this.interval = setInterval(() => {
-                console.log(item);
-                console.log(counter);
-                socket.emit('time', `${counter} time left`)
-                socket.emit('item', item)
-                counter--
-                if (counter < 0) {
-                    return this.nextSale()
-                }
-            }, 1000)
-        }, counter)
-    }
-
-    nextSale = () => {
-        this.incRound()
-        if (this.bids.length != 1) {
-            this.resetBids()
-            return clearInterval(this.interval), false
-        }
-        else {
-            const winingBid = this.bids[0]
-            console.log(winingBid);
-            clearInterval(this.interval)
-            return winingBid
-        }
-    }
-}
-
-
+        };
+        return this.bids;
+    };
+};
 module.exports = Game;
