@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom'
-import { useDispatch, useSelector} from 'react-redux';
-import * as actions from '../../store/actions/index'
 import socket from '../../socket';
 import './Join.css';
+
 
 const Join = () => {
     const history = useHistory();
     const [userName, setUserName] = useState('');
-    const dispatch = useDispatch();
-    const gameIsRun = useSelector(state => state.game.isRun)
+
+
     const handleChenge = event => {
         const value = event.target.value;
         if (checkValidity(value)) {
@@ -23,10 +22,7 @@ const Join = () => {
 
     const handleSubmit = () => {
         if (userName) {
-            socket.emit("enter", userName);
-            if(!gameIsRun){
-                socket.emit('startGame')
-            }
+            socket.emit("join", userName);
             history.push(`/bord`);
         }
         else {

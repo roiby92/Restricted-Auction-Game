@@ -4,9 +4,11 @@ const dealerConfig = require('../Dealer/Dealer.config');
 class Game {
     constructor() {
         this.dealer = new Dealer()
+        this.room = '1'
         this.isRun = false
         this.currentItem = null
         this.round = 1
+        this.bidsPerRound = 0
         this.bids = []
         this.numberOfPlayers = 0
     };
@@ -23,8 +25,9 @@ class Game {
         this.round = 1;
         this.bids = [];
         this.numberOfPlayers = 0;
+        console.log("gameIsOver");
     };
-    incRound = () => this.round += 1;
+    nextRound = () => this.round += 1;
     getGameStatus = () => this.isRun;
     getItemList = () => this.dealer.itemsList
     getTotalPrice = () => this.dealer.totalPrice;
@@ -40,18 +43,31 @@ class Game {
     setBestBid = (bid) => {
         if (this.bids.length === 0) {
             this.bids.push(bid);
+            this.bidsPerRound++
+            return true
         }
-        else if (bid.price > this.bids[0].price) {
+        else if (bid.bidPrice > this.bids[0].bidPrice) {
             this.resetBids();
             this.bids.push(bid);
+            this.bidsPerRound++
+            return true
         }
-        else if (bid.price === this.bids[0].price) {
+        else if (bid.bidPrice === this.bids[0].bidPrice) {
             this.bids.push(bid);
+            this.bidsPerRound++
+            return true
         }
-        else if (bid.price < this.bids[0].price) {
+        else if (bid.bidPrice < this.bids[0].bidPrice) {
             return false
         };
-        return this.bids;
     };
+
+    checkWarFactoe = (players) => {
+        if (this.bidsPerRound > players * 2) {
+            this.currentItem.price = this.currentItem.price * (bidsPerRound / players) * dealerConfig.warFactor;
+            return true
+        }
+        return false;
+    }
 };
 module.exports = Game;

@@ -1,10 +1,11 @@
 class Player {
-    constructor(id, name) {
-        this.id = id;
-        this.playerName = name;
-        this.budget = 0;
-        this.currentBid = null;
-        this.itemsPurchased = [];
+    constructor(socketId, room, name) {
+        this.id = socketId
+        this.room = room
+        this.playerName = name
+        this.budget = 0
+        this.currentBid = null
+        this.itemsPurchased = []
     };
 
     setBudget = budget => this.budget = budget;
@@ -13,10 +14,10 @@ class Player {
     playerDetails = () => console.log(this);
 
     playerPurchaseItem = (bid) => {
-        this.budget -= bid.price;
-        this.itemsPurchased.push(bid);
+        this.budget -= bid.bidPrice;
+        this.itemsPurchased.push(bid.item);
+        console.log(this.budget, this.itemsPurchased);
     };
 
-}
-
+};
 module.exports = Player;

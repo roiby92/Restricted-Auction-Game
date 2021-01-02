@@ -3,5 +3,6 @@
     "m": 5,
     "x": 100,
     "y": 2000,
-    "warFactor": 0.01
+    "warFactor": 0.01,
+    "gameRoom": "1"
 }

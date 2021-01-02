@@ -3,6 +3,10 @@ const app = express();
 const bodyParser = require('body-parser');
 const socketIO = require('socket.io');
 const PORT = 3001;
+const Actions = require('./playersActions');
+
+const Game = require('./Game/Game');
+const Player = require('./Player/Player');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -16,136 +20,123 @@ const server = app.listen(PORT, function (req, res) {
     console.log(`running on port ${PORT}`);
 });
 
-const Game = require('./Game/Game');
-const Queue = require('./Game/Queue');
-const Player = require('./Player/Player');
 
-const playersQueue = new Queue();
-const playersList = [];
+const playersList = []
+const playersActions = Actions(playersList);
+
 const io = socketIO(server);
 const game = new Game();
-
-let playerId = 0;
 let interval, sale;
 
 io.on('connection', (socket) => {
 
-    socket.on('enter', (name) => {
-        // Player Enter To The Game
-        let player = new Player(++playerId, name);
-        playersQueue.enqueue(player);
-        // Start New Game 
+    socket.on('join', (name) => {
+        let player = new Player(socket.id, game.room, name);
+        playersActions.addPlayer(player)
+        socket.join(player.room)
+        io.to(game.room).emit('playerEnterGameMsg', `${player.playerName} enter to The Game Room`);
+        io.to(game.room).emit("newPlayer", player);
+
         if (!game.getGameStatus()) {
-            socket.on('startGame', () => {
-                game.gameStart();
-                while (!playersQueue.isEmpty()) {
-                    const player = playersQueue.dequeue();
-                    player.setBudget(game.dealer.totalPrice);
-                    playersList.push(player);
-                    console.log(playersList);
-                    socket.emit("palyersList", playersList);
-                };
-                socket.emit('start', game)
-                sale = sellItem(game.getCurrentItem(), socket);
-            });
-            socket.on('offer', (bid) => {
-                console.log(bid);
-                // const newBidsList = game.setBestBid(bid);
-                // if (newBidsList) {
-                //     //socket.emit('newBidsList', newBidsList);
-                // };
-                clearInterval(interval);
-                sale = sellItem(game.getCurrentItem(), socket);
-            });
-        }
-        else {
-            console.log(player);
-            socket.emit("playersQueue", playersQueue);
+            game.gameStart();
+            playersActions.setBudget(game.getTotalPrice())
+            io.to(game.room).emit('newBudget', game.getTotalPrice())
+            io.to(game.room).emit('startGameMsg', `Game Is starting wit ${playersList.length} players, total items values of $ ${game.getTotalPrice()}`);
+            sale = sellItem(socket);
         };
-        socket.on('disconnect', (id) => {
-            const playerIndex = playersList.findIndex(player => player.id === id);
-            if (playerIndex !== -1) {
-                socket.emit("playerLeave", playerIndex)
-                return playersList.splice(playerIndex, 1);
-            }
-            else {
-                while (!playersQueue.isEmpty()) {
-                    const player = playersQueue.dequeue();
-                    if (player.id != id) {
-                        playersQueue.enqueue(player)
-                        socket.emit("playersQueue", playersQueue);
-                    };
-                };
-            };
-            console.log('Player has left', playerIndex);
-        });
+        io.to(game.room).emit('game', game)
+    });
+
+    socket.on('offer', (bid) => {
+        console.log(socket.id)
+        const player = playersActions.findPlayer(socket.id)
+        console.log(player,"RRRRRR");
+        const newBid = {
+            playerId: player.id,
+            bidPrice: parseInt(bid),
+            item: game.getCurrentItem()
+        };
+        const newBidsList = game.setBestBid(newBid);
+        if (newBidsList) {
+            io.to(game.room).emit('playerBidMsg', `${player.playerName} Submitted a $ ${newBid.price} bid on ${newBid.item.name}`);
+            console.log(newBidsList);
+            clearInterval(interval);
+            clearTimeout(sale)
+            return sale = sellItem(socket);
+        };
+    });
+
+    socket.on('disconnect', () => {
+        const playerRemoved = playersActions.removePlayer(socket.id);
+        if (playerRemoved) {
+            // console.log(`${player.name} Left the game room`);
+            io.to(game.room).emit('playerLeave', playerRemoved.id);
+            io.to(game.room).emit('playerLeaveMsg', `Player ${playerRemoved.playerName} Left the game room`);
+        };
+        if (playersActions.getLength() === 0) {
+            game.gameOver();
+            clearInterval(interval);
+            clearTimeout(sale)
+        }
     });
 });
 
-
-const sellItem = (item, socket) => {
-    let counter = 10;
+const sellItem = () => {
+    let counter = 18;
     return setTimeout(() => {
         interval = setInterval(() => {
-            socket.emit('time', `${counter} time left`);
-            socket.emit('item', item);
-            console.log(item);
-            console.log(counter);
+            io.to(game.room).emit('time', `${counter} time left`);
+
             counter--
-            nextSale(counter, socket);
+            nextSale(counter);
         }, 1000);
     }, counter);
 };
-
 const nextSale = (counter, socket) => {
     if (counter < 0) {
         if (checkGame(socket)) {
             const winningBid = game.getWinningBid();
             if (winningBid) {
-                const player = playersList.find(player => player.id === winningBid.id);
+                const player = playersActions.findPlayer(winningBid.playerId);
                 player.playerPurchaseItem(winningBid);
+                io.to(game.room).emit('winningBid',winningBid );
+                io.to(game.room).emit('winningBidMsg', `${player.playerName} has Purchased ${winningBid.item.name} for a ${winningBid.bidPrice} , Your are very lucky`);
                 game.dealer.itemSold(winningBid);
-                return winningBid, sale = sellItem(game.getCurrentItem(), socket);
             };
-            game.incRound();
+            game.nextRound();
             game.resetBids();
-            game.setCurrentItem()
-            socket.emit('updateGame', game)
+            game.setCurrentItem();
             clearInterval(interval);
-            return sale = sellItem(game.getCurrentItem(), socket);
+            return sale = sellItem(socket);
         };
+        clearInterval(interval);
+        clearTimeout(sale)
+        game.gameOver();
+        io.to(game.room).emit("game", game);
     };
 };
 
-const checkGame = (socket) => {
-    if (game.round === game.dealer.N && playersList.length > 0) {
-        const gameWinner = getGameWinner();
-        socket.emit('winner', gameWinner);
+const checkGame = () => {
+    if (game.round === game.dealer.N) {
+        console.log('NEW GAMEEEEEW');
+        const gameWinner = playersActions.getGameWinner();
+        console.log(gameWinner);
+        io.to(game.room).emit('winner', gameWinner);
         clearInterval(interval);
         clearTimeout(sale);
         game.gameOver();
         game.gameStart();
-        setTimeout(()=>{
-            socket.emit('start', game)
-            sale = sellItem(game.getCurrentItem(), socket);
-        },5000)
+        io.to(game.room).emit('newBudget', game.getTotalPrice())
+        setTimeout(() => {
+            io.to(game.room).emit('start', game)
+            sale = sellItem();
+        }, 7000);
         return false;
-    }
-    if (playersList.length === 0) {
-        clearInterval(interval);
-        clearTimeout(sale)
-        game.gameOver();
+    };
+    if (playersActions.getLength() === 0) {
+
         return false;
     };
     return true;
 };
 
-const getGameWinner = () => {
-    let winner = playersList[0]
-    for (let player in playersList) {
-        if (player.budget > winner.budget) {
-            winner = player
-        };
-    };
-    return console.log(winner);;  
-};
