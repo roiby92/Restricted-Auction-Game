@@ -1,19 +1,16 @@
 export {
-    gameStart,
     updateGame,
     gameOver,
-    setCurrentItem,
     playerBid,
     setTime,
 } from './game';
 
 export {
-    setPlayersList,
+    addPlayerToList,
     playerLeave,
-    playerPurchaseItem
+    playerPurchaseItem,
+    setBudget
 } from './player';
-
 export {
-    setPlayersQueue,
-    resetQueue
-} from './playersQueue';
+    addMessage,resetMessages    
+} from './gameMessages';

@@ -1,21 +1,12 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import * as actions from '../../store/actions/index'
-import socket from '../../socket';
+import React from 'react';
+import { useSelector } from 'react-redux';
+
 const CurrentItem = () => {
     const currentItem = useSelector(state => state.game.currentItem);
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-        socket.on('updateGame', (game) => {
-            console.log(game, 'game Updated');
-            dispatch(actions.updateGame(game))
-        });
-    }, [currentItem]);
 
     if (currentItem) {
         return (
-            <div>
+            <div id="item-conteimet">
                 <p>{currentItem.name}</p>
                 <p>{currentItem.price}</p>
             </div>

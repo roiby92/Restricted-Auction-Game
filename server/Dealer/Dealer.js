@@ -14,15 +14,16 @@ class Dealer {
 
     resetData = () => {
         this.N = 0
-        this.itemsList = [];
+        this.itemsList = []
         this.profit = 0
-        this.totalPrice = 0;
+        this.totalPrice = 0
     }
 
     itemSold = (winningBid) => {
-        const itemIndex = this.itemsList.findIndex(item => item.name === winningBid.name);
-        this.itemsList.splice(itemIndex, 1);
+        const itemIndex = this.itemsList.findIndex(item => item.name === winningBid.item.name);
+        this.itemsList.splice(itemIndex, 1,'item Sold');
         this.profit += winningBid.bidPrice;
+        console.log(this.profit,this.itemsList,'dealerrrrr');
     };
 
     checkValidity = (number) => {
