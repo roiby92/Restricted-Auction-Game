@@ -8,8 +8,12 @@ const Player = require('./Player/Player');
 const cors = require('cors')
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, 'build')));
 app.use(cors())
 
+app.get('*', function (req, res) {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
 const server = app.listen(PORT || process.env.PORT, function (req, res) {
     console.log(`running on port ${PORT}`);
 });
