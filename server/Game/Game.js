@@ -1,5 +1,5 @@
 const Dealer = require('../Dealer/Dealer');
-const dealerConfig = require('../Dealer/Dealer.config');
+const dealerConfig = require('../../Dealer.config.json');
 
 class Game {
     constructor() {
