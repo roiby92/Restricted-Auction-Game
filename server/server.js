@@ -5,18 +5,17 @@ const socketIO = require('socket.io');
 const PORT = 3001;
 const Game = require('./Game/Game');
 const Player = require('./Player/Player');
-const cors = require('cors')
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'build')));
-app.use(cors())
-
-app.get('*', function (req, res) {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
+    next();
 });
 
-
-const server = app.listen(PORT || process.env.PORT, function (req, res) {
+const server = app.listen(PORT, function (req, res) {
     console.log(`running on port ${PORT}`);
 });
 
@@ -80,7 +79,7 @@ const sellItem = () => {
     let counter = 10;
     return setTimeout(() => {
         interval = setInterval(() => {
-            io.to(game.room).emit('time', `There are ${counter} seconds left in this current round `);
+            io.to(game.room).emit('time', `${counter} time left`);
             io.to(game.room).emit('game', game)
             counter--
             nextSale(counter);
