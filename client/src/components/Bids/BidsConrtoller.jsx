@@ -1,8 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import * as actions from '../../store/actions/index'
+import React, {  useState } from 'react'
+import { useSelector } from 'react-redux';
 import socket from '../../socket'
-import './BidsConrtoller.css';
 const BidsConrtoller = () => {
 
     const currentItem = useSelector(state => state.game.currentItem);

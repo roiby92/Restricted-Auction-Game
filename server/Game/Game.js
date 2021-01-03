@@ -2,19 +2,18 @@ const Dealer = require('../Dealer/Dealer');
 const dealerConfig = require('../Dealer/Dealer.config');
 
 class Game {
-    constructor(IO) {
+    constructor() {
         this.dealer = new Dealer()
         this.room = '1'
-        this.IoConnection = IO
         this.isRun = false
         this.players = []
         this.messages = []
         this.currentItem = null
-        this.currentSale = null
+        this.gameNumer = 0
         this.round = 1
         this.bidsPerRound = 0
         this.bids = []
-        this.numberOfPlayers = 0
+        this.bidsPerRound = 0
     };
 
     addPlayer = player => {
@@ -23,7 +22,7 @@ class Game {
     };
     removePlayer = (id) => {
         const index = this.players.findIndex((user) => user.id === id);
-        if (index !== -1) return players.splice(index, 1)[0];
+        if (index !== -1) return this.players.splice(index, 1)[0];
     };
 
     findPlayer = (id) => this.players.find((player) => player.id === id);
@@ -44,12 +43,20 @@ class Game {
         });
     };
 
-    getPlayers = (room) => players.filter(player => player.room === room);
+    getPlayers = (room) => this.players.filter(player => player.room === room);
 
     gameStart = () => {
         this.isRun = true;
+        this.gameNumer++;
         this.dealer.initItemsList();
+        this.setBudget()
         this.setCurrentItem();
+        this.messages.push(`Game Number ${this.gameNumer} Is starting wit ${this.players.length} players, total items values of $ ${this.getTotalPrice()}`)
+    };
+    newGame = () => {
+        this.currentItem = null;
+        this.round = 1;
+        this.bids = [];
     };
     gameOver = () => {
         this.dealer.resetData();
@@ -57,10 +64,14 @@ class Game {
         this.currentItem = null;
         this.round = 1;
         this.bids = [];
+        this.messages = []
         this.numberOfPlayers = 0;
         console.log("gameIsOver");
     };
-    nextRound = () => this.round += 1;
+    nextRound = () => {
+        this.round += 1;
+        this.bidsPerRound = 0
+    }
     getGameStatus = () => this.isRun;
     getItemList = () => this.dealer.itemsList
     getTotalPrice = () => this.dealer.totalPrice;
@@ -73,21 +84,25 @@ class Game {
     };
     setCurrentItem = () => this.currentItem = this.dealer.itemsList[this.round - 1];
     resetBids = () => this.bids = [];
+
     setBestBid = (bid) => {
         if (this.bids.length === 0) {
             this.bids.push(bid);
             this.bidsPerRound++
+            this.checkWarFactoe()
             return true
         }
         else if (bid.bidPrice > this.bids[0].bidPrice) {
             this.resetBids();
             this.bids.push(bid);
             this.bidsPerRound++
+            this.checkWarFactoe()
             return true
         }
         else if (bid.bidPrice === this.bids[0].bidPrice) {
             this.bids.push(bid);
             this.bidsPerRound++
+            this.checkWarFactoe()
             return true
         }
         else if (bid.bidPrice < this.bids[0].bidPrice) {
@@ -95,15 +110,17 @@ class Game {
         };
     };
 
-    checkWarFactoe = (players) => {
-        if (this.bidsPerRound > players * 2) {
-            this.currentItem.price = this.currentItem.price * (bidsPerRound / players) * dealerConfig.warFactor;
+    checkWarFactoe = () => {
+        if (this.players.length > 2 && this.bidsPerRound / 2 > this.players.length) {
+            console.log(this.currentItem.price);
+            this.currentItem[price] = this.currentItem[price] * (thisbidsPerRound / this.players.length) * dealerConfig.warFactor;
+
             return true
         }
         return false;
     }
 
-    addMessage = (msg) =>{
+    addMessage = (msg) => {
         this.messages.push(msg)
     }
 

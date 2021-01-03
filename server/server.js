@@ -3,8 +3,6 @@ const app = express();
 const bodyParser = require('body-parser');
 const socketIO = require('socket.io');
 const PORT = 3001;
-const Actions = require('./playersActions');
-
 const Game = require('./Game/Game');
 const Player = require('./Player/Player');
 
@@ -22,8 +20,6 @@ const server = app.listen(PORT, function (req, res) {
 });
 
 
-const playersList = []
-const playersActions = Actions(playersList);
 
 const io = socketIO(server);
 const game = new Game(io);
@@ -35,55 +31,52 @@ io.on('connection', (socket) => {
         let player = new Player(socket.id, game.room, name);
         game.addPlayer(player)
         socket.join(player.room)
-        io.to(game.room).emit('playerEnterGameMsg', `${player.playerName} enter to The Game Room`);
-        io.to(game.room).emit("newPlayer", player);
+        game.messages.push(`${player.playerName} enter to The Game Room`)
 
         if (!game.getGameStatus()) {
             game.gameStart();
-            game.setBudget()
-            io.to(game.room).emit('newBudget', game.getTotalPrice())
-            io.to(game.room).emit('startGameMsg', `Game Is starting wit ${playersList.length} players, total items values of $ ${game.getTotalPrice()}`);
             io.to(game.room).emit('game', game)
             sale = sellItem(socket);
         };
-        io.to(game.room).emit('game', game)
     });
 
     socket.on('offer', (bid) => {
-        console.log(socket.id)
         const player = game.findPlayer(socket.id)
-        console.log(player, "RRRRRR");
-        const newBid = {
-            playerId: player.id,
-            bidPrice: parseInt(bid),
-            item: game.getCurrentItem()
-        };
-        const newBidsList = game.setBestBid(newBid);
-        if (newBidsList) {
-            io.to(game.room).emit('playerBidMsg', `${player.playerName} Submitted a $ ${newBid.price} bid on ${newBid.item.name}`);
-            console.log(newBidsList);
-            clearInterval(interval);
-            clearTimeout(sale)
-            return sale = sellItem(socket);
-        };
+        if (player.budget > 0) {
+            const newBid = {
+                playerId: player.id,
+                bidPrice: parseInt(bid),
+                item: game.getCurrentItem()
+            };
+            const newBidsList = game.setBestBid(newBid);
+            if (newBidsList) {
+                game.messages.push(`${player.playerName} Submitted a $ ${newBid.bidPrice} bid on ${newBid.item.name}`)
+                clearInterval(interval);
+                clearTimeout(sale)
+                return sale = sellItem();
+            };
+        }
+        else {
+            game.addMessage(`${player.playerName} Youe cannot bid at the moment, your budget is 0, white for next game`)
+        }
     });
 
     socket.on('disconnect', () => {
         const playerRemoved = game.removePlayer(socket.id);
         if (playerRemoved) {
-            io.to(game.room).emit('playerLeave', playerRemoved.id);
-            io.to(game.room).emit('playerLeaveMsg', `Player ${playerRemoved.playerName} Left the game room`);
+            game.messages.push('playerLeaveMsg', `Player ${playerRemoved.playerName} Left the game room`)
         };
-        if (game.getLength() === 0) {
+        if (game.players.length === 0) {
             game.gameOver();
             clearInterval(interval);
             clearTimeout(sale)
         }
+        io.to(game.room).emit('game', game)
     });
 });
 
 const sellItem = () => {
-    let counter = 18;
+    let counter = 10;
     return setTimeout(() => {
         interval = setInterval(() => {
             io.to(game.room).emit('time', `${counter} time left`);
@@ -98,22 +91,24 @@ const nextSale = (counter, socket) => {
         if (checkGame(socket)) {
             const winningBid = game.getWinningBid();
             if (winningBid) {
+                console.log(winningBid);
                 const player = game.findPlayer(winningBid.playerId);
                 player.playerPurchaseItem(winningBid);
-                io.to(game.room).emit('winningBid', winningBid);
-                io.to(game.room).emit('winningBidMsg', `${player.playerName} has Purchased ${winningBid.item.name} for a ${winningBid.bidPrice} , Your are very lucky`);
                 game.dealer.itemSold(winningBid);
+                game.messages.push(`${player.playerName} has Purchased ${winningBid.item.name} for a ${winningBid.bidPrice} , Your are very lucky`)
+                io.to(game.room).emit('game', game);
             };
             game.nextRound();
             game.resetBids();
             game.setCurrentItem();
             clearInterval(interval);
-            return sale = sellItem(socket);
+            return sale = sellItem();
         };
         clearInterval(interval);
         clearTimeout(sale)
         game.gameOver();
-        io.to(game.room).emit("game", game);
+        game.gameStart();
+        return sale = sellItem();
     };
 };
 
@@ -121,21 +116,10 @@ const checkGame = () => {
     if (game.round === game.dealer.N) {
         console.log('NEW GAMEEEEEW');
         const gameWinner = game.getGameWinner();
-        console.log(gameWinner);
-        io.to(game.room).emit('winner', gameWinner);
+        game.messages.push(`The Game Winner Is ${gameWinner.playerName}`)
+        io.to(game.room).emit('game', game);
         clearInterval(interval);
         clearTimeout(sale);
-        game.gameOver();
-        game.gameStart();
-        io.to(game.room).emit('newBudget', game.getTotalPrice())
-        setTimeout(() => {
-            io.to(game.room).emit('start', game)
-            sale = sellItem();
-        }, 7000);
-        return false;
-    };
-    if (game === 0) {
-
         return false;
     };
     return true;
