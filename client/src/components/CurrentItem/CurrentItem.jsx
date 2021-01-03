@@ -7,8 +7,10 @@ const CurrentItem = () => {
     if (currentItem) {
         return (
             <div id="item-conteimet">
-                <p>{currentItem.name}</p>
-                <p>{currentItem.price}</p>
+
+                <h3>{currentItem.name}</h3>
+                    Is Offer for a
+                <h3>$ {currentItem.price}</h3>
             </div>
         );
     }

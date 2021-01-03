@@ -8,16 +8,13 @@ import thunk from 'redux-thunk';
 import './index.css';
 import App from './App';
 import gameRducer from './store/reducers/game';
-import playerReducer from './store/reducers/player';
-import gameMessagesReducer from './store/reducers/gameMessages';
 import reportWebVitals from './reportWebVitals';
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 const rootReducer = combineReducers({
   game: gameRducer,
-  player: playerReducer,
-  gameMessages: gameMessagesReducer
 });
+
 const store = createStore(rootReducer, composeEnhancers(applyMiddleware(thunk)));
 const app = (
   <Provider store={store}>

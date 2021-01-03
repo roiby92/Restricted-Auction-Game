@@ -1,22 +1,15 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import * as actions from '../../store/actions/index'
-import socket from '../../socket'
-import BidContriler from '../Bids/BidsConrtoller'
+import React from 'react';
+import { useSelector } from 'react-redux';
 
-const Players = ({ player }) => {
-
-    const players = useSelector(state => state.player.players)
-
-    useEffect(() => {
-
-    }, [])
-    const playersList = players.filter(p => p.budget > 0);
+const Players = () => {
+    const players = useSelector(state => state.game.players)
     return (
-        <div>
+        <ol>
+            players
+            <br/>
             {console.log(players)}
-            {playersList.map(player => <p key={player.id}>{player.name}</p>)}
-        </div>
+            {players ? players.map(player => <li key={player.id}>{player.playerName}</li>) : <h3>No Players Available</h3>}
+        </ol>
     );
 };
 export default Players;

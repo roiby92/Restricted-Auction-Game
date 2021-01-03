@@ -1,4 +1,4 @@
-const dealerConfig = require('./Dealer.config')
+const dealerConfig = require('../../Dealer.config.json')
 
 class Dealer {
     constructor() {
