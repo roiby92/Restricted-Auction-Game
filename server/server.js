@@ -16,6 +16,7 @@ app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Content-Length, X-Requested-With');
     next();
 });
+
 const server = app.listen(PORT, function (req, res) {
     console.log(`running on port ${PORT}`);
 });
@@ -25,23 +26,24 @@ const playersList = []
 const playersActions = Actions(playersList);
 
 const io = socketIO(server);
-const game = new Game();
+const game = new Game(io);
 let interval, sale;
 
 io.on('connection', (socket) => {
 
     socket.on('join', (name) => {
         let player = new Player(socket.id, game.room, name);
-        playersActions.addPlayer(player)
+        game.addPlayer(player)
         socket.join(player.room)
         io.to(game.room).emit('playerEnterGameMsg', `${player.playerName} enter to The Game Room`);
         io.to(game.room).emit("newPlayer", player);
 
         if (!game.getGameStatus()) {
             game.gameStart();
-            playersActions.setBudget(game.getTotalPrice())
+            game.setBudget()
             io.to(game.room).emit('newBudget', game.getTotalPrice())
             io.to(game.room).emit('startGameMsg', `Game Is starting wit ${playersList.length} players, total items values of $ ${game.getTotalPrice()}`);
+            io.to(game.room).emit('game', game)
             sale = sellItem(socket);
         };
         io.to(game.room).emit('game', game)
@@ -49,8 +51,8 @@ io.on('connection', (socket) => {
 
     socket.on('offer', (bid) => {
         console.log(socket.id)
-        const player = playersActions.findPlayer(socket.id)
-        console.log(player,"RRRRRR");
+        const player = game.findPlayer(socket.id)
+        console.log(player, "RRRRRR");
         const newBid = {
             playerId: player.id,
             bidPrice: parseInt(bid),
@@ -67,13 +69,12 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        const playerRemoved = playersActions.removePlayer(socket.id);
+        const playerRemoved = game.removePlayer(socket.id);
         if (playerRemoved) {
-            // console.log(`${player.name} Left the game room`);
             io.to(game.room).emit('playerLeave', playerRemoved.id);
             io.to(game.room).emit('playerLeaveMsg', `Player ${playerRemoved.playerName} Left the game room`);
         };
-        if (playersActions.getLength() === 0) {
+        if (game.getLength() === 0) {
             game.gameOver();
             clearInterval(interval);
             clearTimeout(sale)
@@ -86,7 +87,7 @@ const sellItem = () => {
     return setTimeout(() => {
         interval = setInterval(() => {
             io.to(game.room).emit('time', `${counter} time left`);
-
+            io.to(game.room).emit('game', game)
             counter--
             nextSale(counter);
         }, 1000);
@@ -97,9 +98,9 @@ const nextSale = (counter, socket) => {
         if (checkGame(socket)) {
             const winningBid = game.getWinningBid();
             if (winningBid) {
-                const player = playersActions.findPlayer(winningBid.playerId);
+                const player = game.findPlayer(winningBid.playerId);
                 player.playerPurchaseItem(winningBid);
-                io.to(game.room).emit('winningBid',winningBid );
+                io.to(game.room).emit('winningBid', winningBid);
                 io.to(game.room).emit('winningBidMsg', `${player.playerName} has Purchased ${winningBid.item.name} for a ${winningBid.bidPrice} , Your are very lucky`);
                 game.dealer.itemSold(winningBid);
             };
@@ -119,7 +120,7 @@ const nextSale = (counter, socket) => {
 const checkGame = () => {
     if (game.round === game.dealer.N) {
         console.log('NEW GAMEEEEEW');
-        const gameWinner = playersActions.getGameWinner();
+        const gameWinner = game.getGameWinner();
         console.log(gameWinner);
         io.to(game.room).emit('winner', gameWinner);
         clearInterval(interval);
@@ -133,7 +134,7 @@ const checkGame = () => {
         }, 7000);
         return false;
     };
-    if (playersActions.getLength() === 0) {
+    if (game === 0) {
 
         return false;
     };

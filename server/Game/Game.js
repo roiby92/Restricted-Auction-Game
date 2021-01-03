@@ -2,16 +2,49 @@ const Dealer = require('../Dealer/Dealer');
 const dealerConfig = require('../Dealer/Dealer.config');
 
 class Game {
-    constructor() {
+    constructor(IO) {
         this.dealer = new Dealer()
         this.room = '1'
+        this.IoConnection = IO
         this.isRun = false
+        this.players = []
+        this.messages = []
         this.currentItem = null
+        this.currentSale = null
         this.round = 1
         this.bidsPerRound = 0
         this.bids = []
         this.numberOfPlayers = 0
     };
+
+    addPlayer = player => {
+        this.players.push(player);
+        console.log(this.players);
+    };
+    removePlayer = (id) => {
+        const index = this.players.findIndex((user) => user.id === id);
+        if (index !== -1) return players.splice(index, 1)[0];
+    };
+
+    findPlayer = (id) => this.players.find((player) => player.id === id);
+
+    getGameWinner = () => {
+        let winner = this.players[0]
+        for (let player in this.players) {
+            if (player.budget > winner.budget) {
+                winner = player
+            };
+        };
+        return winner;
+    }
+    setBudget = () => {
+        this.players.forEach(p => {
+            p.budget = this.getTotalPrice()
+            console.log(p);
+        });
+    };
+
+    getPlayers = (room) => players.filter(player => player.room === room);
 
     gameStart = () => {
         this.isRun = true;
@@ -69,5 +102,11 @@ class Game {
         }
         return false;
     }
+
+    addMessage = (msg) =>{
+        this.messages.push(msg)
+    }
+
+
 };
 module.exports = Game;
